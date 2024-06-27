@@ -4,6 +4,17 @@ formatters:
   simple:
     format: '%(levelname)s: %(message)s'
     datefmt: '%Y-%m-%dT%H:%M:%S%z'
+  json:
+    (): mylogger.MyJSONFormatter
+    fmt_keys:
+      level: levelname
+      message: message
+      timestamp: timestamp
+      logger: name
+      module: module
+      function: funcName
+      line: lineno
+      thread_name: threadName
 filters:
   no_errors:
     (): mylogger.NonErrorFilter
@@ -16,12 +27,20 @@ handlers:
     - no_errors
   stderr:
     class: logging.StreamHandler
-    formatter: simple
+    formatter: json
     stream: ext://sys.stderr
     level: WARNING
+  file:
+    class: logging.handlers.RotatingFileHandler
+    level: DEBUG
+    formatter: json
+    filename: logs/my_app.log.jsonl
+    maxBytes: 10000
+    backupCount: 3
 loggers:
   root:
-    level: DEBUG
+    level: ${LOG_LEVEL}
     handlers:
     - stdout
     - stderr
+    - file
